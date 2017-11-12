@@ -1,0 +1,38 @@
+---
+sudo: false
+distro: trusty
+group: beta
+notification:
+    email: false
+    on_failure: never
+language: go
+go: "1.9"
+
+matrix:
+    include:
+        # CLI tests using BATS
+        -
+          before_install:
+              - git clone --depth 1 https://github.com/sstephenson/bats "$HOME/bats"
+          env:
+              PATH: "$HOME/bats/bin:$PATH"
+          script:
+              - bats -t tests/
+          cache:
+              - $GOPATH/pkg/
+
+        # pre-commit checks
+        - 
+          addons:
+            apt:
+                packages:
+                    - python3-pip
+          install:
+              - pip install --user pre-commit
+          script:
+              - pre-commit run --all-files
+          cache:
+              - $HOME/.pre-commit/
+              - pip
+          env:
+              PATH: "$HOME/.local/bin:$PATH"
